@@ -10,7 +10,7 @@ export default function Header() {
       <div className="relative mx-auto flex h-16 max-w-screen-xl items-center justify-between gap-4 max-md:h-14">
         <Link href="/" className="flex items-center no-underline">
           <h1 className="font-poppins text-body-lg font-bold no-underline max-sm:text-body-md">
-            Explore SG&apos;s election data
+            SG Election Explorer
           </h1>
         </Link>
       </div>
