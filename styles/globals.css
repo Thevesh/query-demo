@@ -1,21 +1,17 @@
-/* TAILWIND CSS */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* Reserve scrollbar space to prevent layout shift when switching languages */
 html {
   scrollbar-gutter: stable;
 }
 
-/* Default border color */
 *,
 ::before,
 ::after {
   @apply border-otl-gray-200;
 }
 
-/* Heading base styles */
 h1 {
   @apply font-poppins text-4xl font-bold leading-[54px] text-txt-black-900;
 }

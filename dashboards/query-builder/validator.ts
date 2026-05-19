@@ -21,7 +21,6 @@ export function prepareQuery(rawSql: string): string {
   };
 
   for (const [alias, url] of Object.entries(datasets) as [string, string][]) {
-    // Match unquoted table names or single-quoted table names.
     const unquoted = new RegExp(`\\b${alias}\\b`, "gi");
     const singleQuoted = new RegExp(`'${alias}'`, "gi");
     const replacement = `'${url}'`;

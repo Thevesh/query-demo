@@ -493,8 +493,6 @@ const QueryResults = memo(function QueryResults({
   );
 });
 
-// ── Main dashboard ──────────────────────────────────────────────────────────
-
 export default function QueryBuilderDashboard() {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -770,7 +768,6 @@ export default function QueryBuilderDashboard() {
       return { text: "Initialising DuckDB WASM…", cls: "text-txt-black-500" };
     if (running) return { text: "Running query…", cls: "text-txt-black-500" };
     if (queryError) return { text: queryError, cls: "text-ogp-blue-600" };
-    if (result) return null;
     return null;
   })();
 
@@ -785,7 +782,6 @@ export default function QueryBuilderDashboard() {
           onMobileClose={() => setMobileSidebarOpen(false)}
         />
 
-        {/* ── Main content ─────────────────────────────────── */}
         <main className="min-w-0 flex-1 px-2 pb-24 pt-8 sm:px-6 lg:px-10">
           <div className="mb-5 flex items-center gap-2 lg:hidden">
             <button
@@ -798,14 +794,12 @@ export default function QueryBuilderDashboard() {
             </button>
           </div>
 
-          {/* Hero */}
           <h1 className="mb-8 font-poppins text-[1.875rem] font-semibold leading-snug text-txt-black-900 sm:text-[2rem]">
             Explore 70 years of election data.
             <br />
             You don&apos;t need code, only a question.
           </h1>
 
-          {/* ── Step 1: Ask AI ── */}
           <section className="mb-12">
             <StepLabel n={1} label="Ask AI to build your Query" />
             <p className="mb-4 max-w-2xl text-body-sm text-txt-black-700">
@@ -835,7 +829,6 @@ export default function QueryBuilderDashboard() {
             </button>
           </section>
 
-          {/* ── Step 2: Run your Query ── */}
           <section className="mb-12">
             <StepLabel n={2} label="Run your Query" />
             <div
@@ -994,14 +987,12 @@ export default function QueryBuilderDashboard() {
                 </div>
               </div>
 
-              {/* Status bar — plain text, no monospace */}
               {status ? (
                 <p className={clx("px-1 text-[11px]", status.cls)}>
                   {status.text}
                 </p>
               ) : null}
 
-              {/* Query error */}
               {queryError && (
                 <div className="rounded-xl border border-ogp-blue-200 bg-bg-ogp-blue-100 px-4 py-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-ogp-blue-700">
@@ -1013,7 +1004,6 @@ export default function QueryBuilderDashboard() {
                 </div>
               )}
 
-              {/* Results table */}
               {result && !queryError && (
                 <QueryResults
                   result={result}
@@ -1024,7 +1014,6 @@ export default function QueryBuilderDashboard() {
             </div>
           </section>
 
-          {/* ── Step 3: Share your Query ── */}
           <section className="mb-12">
             <StepLabel n={3} label="Share your Query" />
             <p className="mb-4 max-w-2xl text-body-sm text-txt-black-700">

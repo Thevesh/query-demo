@@ -1,12 +1,5 @@
 import type { DatasetKey } from "./datasets";
 
-export interface SampleQuery {
-  name: string;
-  description: string;
-  dataset: DatasetKey;
-  sql: string;
-}
-
 export interface InterestingQuestion {
   question: string;
   group: "Seats" | "Parties" | "Candidates";
@@ -74,20 +67,5 @@ export const INTERESTING_QUESTIONS: InterestingQuestion[] = [
     question: "Who has lost the most electoral contests?",
     dataset: "ballots",
     sql: "SELECT\n  candidate,\n  COUNT(*) FILTER (WHERE result IN ('lost', 'lost_deposit')) AS losses,\n  COUNT(*) FILTER (WHERE result IN ('won', 'won_uncontested')) AS wins,\n  CAST(MIN(year) FILTER (WHERE result IN ('lost', 'lost_deposit')) AS VARCHAR) AS first_loss,\n  FIRST(party ORDER BY year) AS first_party,\n  CAST(MAX(year) FILTER (WHERE result IN ('lost', 'lost_deposit')) AS VARCHAR) AS last_loss,\n  LAST(party ORDER BY year) AS last_party\nFROM ballots\nGROUP BY candidate\nHAVING losses > 0\nORDER BY losses DESC, last_loss DESC\nLIMIT 20",
-  },
-];
-
-export const SAMPLE_QUERIES: SampleQuery[] = [
-  {
-    name: "Preview ballots",
-    description: "First 20 rows of the ballots dataset",
-    dataset: "ballots",
-    sql: "SELECT *\nFROM ballots\nLIMIT 20",
-  },
-  {
-    name: "Preview stats",
-    description: "First 20 rows of the seat stats dataset",
-    dataset: "stats",
-    sql: "SELECT *\nFROM stats\nLIMIT 20",
   },
 ];
