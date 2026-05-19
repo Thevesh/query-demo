@@ -1,5 +1,4 @@
 import { memo, useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -498,7 +497,6 @@ const QueryResults = memo(function QueryResults({
 
 export default function QueryBuilderDashboard() {
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { db, initializing, error: dbError } = useDuckDB();
   const defaultQuestion = INTERESTING_QUESTIONS[0];
@@ -801,8 +799,10 @@ export default function QueryBuilderDashboard() {
           </div>
 
           {/* Hero */}
-          <h1 className="mb-8 font-poppins text-[1.875rem] font-semibold leading-tight text-txt-black-900 sm:text-[2rem]">
-            You don&apos;t need code - only a question
+          <h1 className="mb-8 font-poppins text-[1.875rem] font-semibold leading-snug text-txt-black-900 sm:text-[2rem]">
+            Explore 70 years of election data.
+            <br />
+            You don&apos;t need code, only a question.
           </h1>
 
           {/* ── Step 1: Ask AI ── */}
@@ -941,7 +941,7 @@ export default function QueryBuilderDashboard() {
                     value={activeQueryText}
                     onChange={handleQueryChange}
                     extensions={extensions}
-                    theme={resolvedTheme === "dark" ? "dark" : "light"}
+                    theme="light"
                     basicSetup={{
                       lineNumbers: true,
                       highlightActiveLineGutter: true,

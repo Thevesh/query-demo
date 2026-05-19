@@ -5,6 +5,7 @@ class HTMLDocument extends Document {
     return (
       <Html lang="en-GB">
         <Head>
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
           <link rel="shortcut icon" href="/favicon.ico" />
         </Head>
         <body>
