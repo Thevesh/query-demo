@@ -5,6 +5,7 @@ import { AppPropsLayout } from "@lib/types";
 import { ThemeProvider } from "next-themes";
 import { ReactNode } from "react";
 import { Inter, Poppins } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 const poppins = Poppins({
@@ -29,6 +30,7 @@ function App({ Component, pageProps }: AppPropsLayout) {
       <ThemeProvider attribute="class">
         {layout(<Component {...pageProps} />, pageProps)}
       </ThemeProvider>
+      <Analytics />
     </main>
   );
 }
