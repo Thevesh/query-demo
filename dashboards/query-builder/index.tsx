@@ -10,6 +10,8 @@ import {
   CheckCircleIcon,
   ClipboardDocumentIcon,
   ClipboardDocumentCheckIcon,
+  ClipboardIcon,
+  TrashIcon,
   WrenchScrewdriverIcon,
   PencilSquareIcon,
 } from "@heroicons/react/20/solid";
@@ -659,6 +661,22 @@ export default function QueryBuilderDashboard() {
     setTimeout(() => setCopyState("idle"), 2000);
   }, [activeQueryText]);
 
+  const handleClear = useCallback(() => {
+    setQueryText("");
+    setActiveSource("workspace");
+    setActiveSample(null);
+    setShortShareUrl(null);
+  }, []);
+
+  const handlePaste = useCallback(async () => {
+    const text = await navigator.clipboard.readText();
+    if (!text) return;
+    setQueryText(text);
+    setActiveSource("workspace");
+    setActiveSample(null);
+    setShortShareUrl(null);
+  }, []);
+
   const handleCopyPrompt = useCallback(async () => {
     await navigator.clipboard.writeText(copyPrompt);
     setPromptCopyState("copied");
@@ -767,7 +785,7 @@ export default function QueryBuilderDashboard() {
     if (initializing)
       return { text: "Initialising DuckDB WASM…", cls: "text-txt-black-500" };
     if (running) return { text: "Running query…", cls: "text-txt-black-500" };
-    if (queryError) return { text: queryError, cls: "text-ogp-blue-600" };
+    if (queryError) return { text: queryError, cls: "text-red-600" };
     return null;
   })();
 
@@ -909,10 +927,26 @@ export default function QueryBuilderDashboard() {
                       Format
                     </button>
                     <button
+                      onClick={handleClear}
+                      disabled={!activeQueryText.trim()}
+                      title="Clear editor"
+                      className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-medium text-txt-black-700 transition-colors hover:bg-bg-washed-active disabled:opacity-40"
+                    >
+                      <TrashIcon className="h-3.5 w-3.5" />
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => void handlePaste()}
+                      className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-medium text-txt-black-700 transition-colors hover:bg-bg-washed-active"
+                    >
+                      <ClipboardIcon className="h-3.5 w-3.5" />
+                      Paste
+                    </button>
+                    <button
                       onClick={handleCopy}
                       disabled={!activeQueryText.trim()}
                       title={copyState === "copied" ? "Copied!" : "Copy SQL"}
-                      className="flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium text-txt-black-500 transition-colors hover:bg-bg-washed-active disabled:opacity-40"
+                      className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-medium text-txt-black-700 transition-colors hover:bg-bg-washed-active disabled:opacity-40"
                     >
                       {copyState === "copied" ? (
                         <>
@@ -992,17 +1026,6 @@ export default function QueryBuilderDashboard() {
                   {status.text}
                 </p>
               ) : null}
-
-              {queryError && (
-                <div className="rounded-xl border border-ogp-blue-200 bg-bg-ogp-blue-100 px-4 py-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-ogp-blue-700">
-                    Query error
-                  </p>
-                  <p className="whitespace-pre-wrap break-words font-mono text-[12px] text-ogp-blue-700">
-                    {queryError}
-                  </p>
-                </div>
-              )}
 
               {result && !queryError && (
                 <QueryResults
