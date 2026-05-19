@@ -1,12 +1,12 @@
 # Civic participation | SG Election Explorer
 
-*Live demo: [go.gov.sg/omedpgo](https://go.gov.sg/omedpgo) · Data sourced from [data.gov.sg](https://data.gov.sg/datasets?agencies=Elections+Department+(ELD)&resultId=1531)*
+*Live demo: [omedpgo.thevesh.com/](https://omedpgo.thevesh.com/) · Data sourced from [data.gov.sg](https://data.gov.sg/datasets?agencies=Elections+Department+(ELD)&resultId=1531)*
 
 ## Problem Statement
 
 Singapore's election data is technically public, since the Elections Department publishes results after every General Election. [data.gov.sg](https://elections.data.gov.sg/en) has done great work making this data more accesible—but this can be improved!
 
-**The main problem: public data that is not usable by non-technical citizens.** A downloadable CSV file containing raw data is not the same as data you can query. Converting raw election results into a usable format—cleaning, normalising, generating meaningful derived fields, and storing it in a queryable structure—requires non-trivial engineering work. Most citizens never get past the first download.
+**The main problem: Public data that is not usable by non-technical citizens.** A downloadable CSV file containing raw data is not the same as data you can query. Converting raw election results into a usable format—cleaning, normalising, generating meaningful derived fields, and storing it in a queryable structure—requires non-trivial engineering work. Most citizens never get past the first download.
 
 Three specific failure modes make this worse:
 
@@ -18,15 +18,15 @@ Three specific failure modes make this worse:
 
 ## Features & Prioritisation
 
-**P0—AI-assisted query generation.** A pre-built prompt, bundled in the product, gives any LLM the full schema and context it needs to convert a natural-language question into valid SQL. Users copy the prompt, paste it into any AI tool, and ask their question. The AI writes the SQL; the user pastes it back. This single feature eliminates the SQL barrier without locking users into one AI provider or incurring API costs.
+**P0: AI-assisted query generation.** A pre-built prompt, bundled in the product, gives any LLM the full schema and context it needs to convert a natural-language question into valid SQL. Users copy the prompt, paste it into any AI tool, and ask their question. The AI writes the SQL; the user pastes it back. This single feature eliminates the SQL barrier without locking users into one AI provider or incurring API costs.
 
-**P0—In-browser SQL execution via DuckDB WASM.** Queries run entirely in the browser using DuckDB compiled to WebAssembly. There is no backend, no server, no query queue. A user with a mid-range laptop can join two datasets spanning 70 years of election data and get results in under 200ms. This also means zero infrastructure cost per query run, and no data ever leaves the user's device.
+**P0: In-browser SQL execution via DuckDB WASM.** Queries run entirely in the browser using DuckDB compiled to WebAssembly. There is no backend, no server, no query queue. A user with a mid-range laptop can join two datasets spanning 70 years of election data and get results in under 200ms. This also means zero infrastructure cost per query run, and no data ever leaves the user's device.
 
-**P1—Curated sample queries.** Twelve pre-written questions covering seats, parties, and candidates serve two purposes: onboarding for users who want to explore without knowing what to ask, and a quality signal that demonstrates what the data can answer. Sample queries are the product's "show, don't tell."
+**P1: Curated sample queries.** Twelve pre-written questions covering seats, parties, and candidates serve two purposes: onboarding for users who want to explore without knowing what to ask, and a quality signal that demonstrates what the data can answer. Sample queries are the product's "show, don't tell."
 
-**P1—Shareable encoded URLs.** A user's query is fully encoded in the URL. Anyone with the link can open it with the same query ready to run. No login, no storage, no server round-trip. This turns individual analysis into civic conversation: a journalist can share a query, a teacher can assign one, a voter can fact-check a claim by sharing the exact computation that produced it.
+**P1: Shareable encoded URLs.** A user's query is fully encoded in the URL. Anyone with the link can open it with the same query ready to run. No login, no storage, no server round-trip. This turns individual analysis into civic conversation: a journalist can share a query, a teacher can assign one, a voter can fact-check a claim by sharing the exact computation that produced it.
 
-**P2—CSV export and short links.** Copy-to-CSV enables downstream analysis, if needed. GoGovSG short links make URLs shareable in messages and social posts. Both reduce friction at the output stage without requiring any architectural changes.
+**P2: CSV export and short links.** Copy-to-CSV enables downstream analysis, if needed. GoGovSG short links make URLs shareable in messages and social posts. Both reduce friction at the output stage without requiring any architectural changes.
 
 Features deliberately not built: user accounts, saved queries, visualisation charts, commenting. These add complexity without meaningfully expanding the audience at this stage.
 
@@ -34,18 +34,24 @@ Features deliberately not built: user accounts, saved queries, visualisation cha
 ## Implementation
 
 **Stack:**
-- **DuckDB WASM**—columnar analytics engine compiled to WebAssembly. Handles multi-table joins and window functions over millions of rows in the browser. Eliminates the need for a query execution backend entirely.
-- **Parquet on CDN**—election datasets are pre-processed and hosted as Parquet files. Parquet's columnar layout means DuckDB only reads the columns a query touches, not the full dataset. Files are typically 5–10× smaller than equivalent CSVs and load efficiently over HTTP range requests.
-- **CodeMirror with SQL dialect**—browser-native code editor with SQL syntax highlighting and bracket matching. Familiar enough for technical users; non-threatening for everyone else because they are pasting AI-generated code, not writing from scratch.
-- **Next.js**—least important part of the stack. I used it because I'm familiar with it, but you could swap it out for vanilla HTML/CSS/JS if you wanted. 
+- **DuckDB WASM**: Columnar analytics engine compiled to WebAssembly. Handles multi-table joins and window functions over millions of rows in the browser. Eliminates the need for a query execution backend entirely.
+- **Parquet on CDN**: Election datasets are pre-processed and hosted as Parquet files. Parquet's columnar layout means DuckDB only reads the columns a query touches, not the full dataset. Files are typically 10× smaller than equivalent CSVs and load efficiently over HTTP range requests.
+- **CodeMirror with SQL dialect**: Browser-native code editor with SQL syntax highlighting and bracket matching. Familiar enough for technical users; non-threatening for everyone else because they are pasting AI-generated code, not writing from scratch.
+- **Next.js**: Least important part of the stack. I used it because I'm familiar with it, but you could swap it out for vanilla HTML/CSS/JS if you wanted. Similar, this demo is deployed on Vercel for convenience, but it doesn't have to be.
+
+**Wishlist (not built here, for parsimony):**
+- Cloudflare Turnstile: Bot protection on the short-link generation endpoint and any future server-side features. Without it, a viral spike is also an invitation for abuse. Turnstile is invisible to real users and free at reasonable volumes.
+- ClickHouse for usage analytics.
+- GoGovSG short-link integration: The short-link button is stubbed in this demo.
+Automated data pipeline: Currently the Parquet files are built and uploaded manually. A lightweight pipeline would validate the data, regenerate the Parquet files, and push them to the CDN automatically.
 
 **Constraints and trade-offs considered:**
 
-- *WASM has a cold-start cost.* The DuckDB WASM bundle is ~5MB and must be fetched on first load. This is a one-time cost per session; subsequent queries are sub-200ms. Mitigation: the bundle is loaded lazily after the page renders, so the UI is immediately interactive.
+1.  *Bring-your-own-AI vs. embedded AI.* The most obvious alternative to the copy-prompt approach is to embed an AI directly in the product—the user types a question, the product calls an LLM API, and SQL appears automatically. I deliberately rejected this approach for three reasons. First, cost: LLM API calls are not cheap, and an election product can balloon costs overnight, which is the wrong property for a civic tool with no revenue model. Second, privacy: an embedded AI requires routing user queries through a server, which means logging, retention risk, and the question of what we do with the data. With the copy-prompt approach, nothing the user types ever leaves their browser unless they choose to generate a short link. Third, provider lock-in: in particular, being prone to its downtime. The copy-prompt approach works with any LLM.
 
-- *SQL is a leaky abstraction for non-coders.* Even with AI assistance, a user who gets a syntax error may not know how to fix it. Mitigation: the sample queries demonstrate correct patterns; the AI prompt includes schema context that significantly reduces error rates; error messages are surfaced clearly in the UI.
+2. *DuckDB (client-side) vs. API (server-side).* The alternative to running DuckDB in the browser is a server that accepts queries and returns results. That approach has a marginal cost for every query run, or a fixed infra cost. With client-side DuckDB, the user's own device does the computation. A million query runs cost the same as ten. This is distributed computing in the most literal sense: every visitor brings their own CPU. The trade-off is a ~5MB WASM bundle on first load, adding a few seconds of cold-start latency. This is mitigated by loading the bundle lazily after the page renders, so the UI is immediately interactive while DuckDB initialises in the background.
 
-- *No server means no usage analytics by default.* Standard page-view analytics (e.g. Plausible) can be added without a backend, but query-level telemetry (which questions users are asking, which queries fail) would require either a lightweight logging endpoint or a client-side analytics solution with event tracking.
+3. *Expose the SQL vs. hide the SQL.* A natural instinct is to hide the SQL entirely—show a text box, return a table, abstract away the mechanics. I chose not to. Showing the SQL serves two purposes. First, transparency: a user can see exactly what computation produced the result they're looking at. Second, education: many Singaporeans are capable of learning or at least understanding SQL if given a working example and gentle exposure. Showing AI-generated SQL alongside its output is one of the most effective ways to teach it. The intimidation concern is real but manageable—especially with a rich array of sample queries.
 
 
 ## Launch & Rollout
